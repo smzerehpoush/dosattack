@@ -1,2 +1,11 @@
 server:
-  port: 8066
+  port: 8099
+  tomcat:
+    max-threads: 1000
+com:
+  mahdiyar:
+    os-project:
+      configuration:
+        thread-config:
+          max-pool-size: 100
+          core-pool-size: 50
