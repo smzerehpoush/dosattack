@@ -22,16 +22,15 @@ import java.util.concurrent.FutureTask;
 @Service
 @Slf4j
 public class AttackService {
+    private final static String text = "attackers count : {1} \n" +
+            "real amount : {2} \n" +
+            "predictable amount: {3} ";
+    private static int attackersCount;
     private Logger attackLogger = LoggerFactory.getLogger("attack-logger");
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
     private RestTemplate restTemplate;
-    private static int attackersCount;
-    private final static String text = "attackers count : {1} \n" +
-            "real amount : {2} \n" +
-            "predictable amount: {3} ";
-
 
     private void attack(long size) {
         attackersCount++;
