@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author Seyyed Mahdiyar Zerehpoush
  */
-@RestController
 @RequestMapping("/verify")
+@RestController
 public class VerifyController {
     @Autowired
     private VerifyService verifyService;

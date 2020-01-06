@@ -6,12 +6,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 /**
  * @author Seyyed Mahdiyar Zerehpoush
  */
-@Component
+@EnableRedisRepositories
 @Configuration
 @ConfigurationProperties(prefix = "database.redis", ignoreUnknownFields = false)
 public class RedisConfig {
@@ -22,10 +23,26 @@ public class RedisConfig {
     @Setter
     private String password;
 
+//    @Bean
+//    JedisConnectionFactory jedisConnectionFactory() {
+//        return new JedisConnectionFactory(redisStandaloneConfiguration());
+//    }
+
     @Bean
-    public LettuceConnectionFactory redisConnectionFactory() {
+    public LettuceConnectionFactory lettuceConnectionFactory() {
+        return new LettuceConnectionFactory(redisStandaloneConfiguration());
+    }
+
+    private RedisStandaloneConfiguration redisStandaloneConfiguration() {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration(hostName, port);
         redisStandaloneConfiguration.setPassword(password.toCharArray());
-        return new LettuceConnectionFactory(redisStandaloneConfiguration);
+        return redisStandaloneConfiguration;
+    }
+
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate() {
+        final RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(lettuceConnectionFactory());
+        return template;
     }
 }

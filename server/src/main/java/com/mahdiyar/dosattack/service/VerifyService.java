@@ -23,7 +23,7 @@ public class VerifyService {
         if (count % 6 == 5)
             Thread.sleep(50);
         count++;
-        log.info("{}", count);
+        logger.info("{}", count);
         return String.valueOf(count);
     }
 }
