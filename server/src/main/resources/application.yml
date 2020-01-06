@@ -4,8 +4,11 @@ server:
     max-threads: 1000
 com:
   mahdiyar:
-    os-project:
+    dosattack:
       configuration:
-        thread-config:
+        thread:
           max-pool-size: 100
           core-pool-size: 50
+        rest-template:
+          connection-timeout: 1000
+          read-timeout: 1000
