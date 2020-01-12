@@ -18,7 +18,10 @@ public class AttackController {
     private AttackService attackService;
 
     @GetMapping
-    public ResponseEntity<String> attack(@RequestParam("init") int init, @RequestParam("max") int max, @RequestParam("steps") int steps) {
+    public ResponseEntity<String> attack(
+            @RequestParam(name = "init", defaultValue = "10") int init,
+            @RequestParam(name = "max", defaultValue = "100") int max,
+            @RequestParam(name = "steps", defaultValue = "5") int steps) {
         return ResponseEntity.ok(attackService.attack(init, max, steps));
     }
 
