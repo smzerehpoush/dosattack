@@ -5,7 +5,6 @@ import com.mahdiyar.dosattack.model.entity.RequestLogEntity;
 import com.mahdiyar.dosattack.repository.mongoRepositories.RequestLogMongoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -13,9 +12,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter {
+    private static ConcurrentHashMap<Long, Integer> ipMap = new ConcurrentHashMap<>();
+    private static Random rnd;
     @Autowired
     private RequestContext requestContext;
     @Autowired
@@ -30,7 +33,9 @@ public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter 
         if (request.getMethod().equals("OPTIONS")) {
             response.addHeader("Access-Control-Allow-Headers", "*");
         }
-        resolveClientIP(request);
+        String ip = resolveClientIP(request);
+        addIpToMap(ip);
+        requestContext.setClientIp(ip);
         RequestLogEntity requestLogEntity = new RequestLogEntity(requestContext.getClientIp(), request.getMethod(), new Date());
 //        requestLogRedisRepository.save(requestLogEntity);
         requestLogMongoRepository.save(requestLogEntity);
@@ -57,15 +62,36 @@ public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter 
         return true;
     }
 
-    private void resolveClientIP(HttpServletRequest request) {
-        String remoteAddr = "";
+    private void addIpToMap(String ip) {
 
-        if (request != null) {
-            remoteAddr = request.getHeader("X-FORWARDED-FOR");
-            if (StringUtils.isEmpty(remoteAddr)) {
-                remoteAddr = request.getRemoteAddr();
-            }
+        Long ipLongValue = convertIpToLong(ip);
+        ipMap.put(ipLongValue, ipMap.getOrDefault(ipLongValue, 1) + 1);
+    }
+
+
+    private String resolveClientIP(HttpServletRequest request) {
+        rnd = new Random(System.currentTimeMillis());
+        switch (rnd.nextInt(4)) {
+            case 0:
+                return "127.0.2.21";
+            case 1:
+                return "54.36.214.65";
+            case 2:
+                return "65.90.24.26";
+            case 3:
+                return "43.76.41.89";
+            default:
+                return "0.0.0.0";
         }
-        requestContext.setClientIp(remoteAddr);
+//        return request.getRemoteAddr().isEmpty() ? "0.0.0.0" : request.getRemoteAddr().split(".").length == 4 ? request.getRemoteAddr() : "0.0.0.0";
+    }
+
+    private Long convertIpToLong(String ip) {
+        String[] ipParts = ip.split("\\.");
+        Long value = 0L;
+        for (int i = 0; i < ipParts.length; i++) {
+            value += (long) Math.pow(256, ipParts.length - 1d - i) * Integer.parseInt(ipParts[i]);
+        }
+        return value;
     }
 }

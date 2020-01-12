@@ -10,5 +10,5 @@ com:
           max-pool-size: 100
           core-pool-size: 50
         rest-template:
-          connection-timeout: 1000
-          read-timeout: 1000
+          connection-timeout: 10000
+          read-timeout: 5000
