@@ -21,7 +21,7 @@ public class AttackController {
     public ResponseEntity<String> attack(
             @RequestParam(name = "init", defaultValue = "10") int init,
             @RequestParam(name = "max", defaultValue = "100") int max,
-            @RequestParam(name = "steps", defaultValue = "5") int steps) {
+            @RequestParam(name = "steps", defaultValue = "5") int steps) throws InterruptedException {
         return ResponseEntity.ok(attackService.attack(init, max, steps));
     }
 

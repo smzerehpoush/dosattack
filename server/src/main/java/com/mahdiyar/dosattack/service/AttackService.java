@@ -22,7 +22,8 @@ import java.util.concurrent.FutureTask;
 @Service
 @Slf4j
 public class AttackService {
-    private final static String text = "attackers count : {1} \n" +
+    private final static String ADDRESS = "http://localhost:8099/api/v1/test";
+    private final static String TEXT = "attackers count : {1} \n" +
             "real amount : {2} \n" +
             "predictable amount: {3} ";
     private static int attackersCount;
@@ -45,7 +46,10 @@ public class AttackService {
 
     }
 
-    public String attack(int initialSize, long maxSize, int steps) {
+    public String attack(int initialSize, long maxSize, int steps) throws InterruptedException {
+        logger.info("5s for warming up....");
+        Thread.sleep(5000);
+        logger.info("start attack process");
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         attackLogger.info("computing each step size ...");
@@ -79,7 +83,7 @@ public class AttackService {
     }
 
     public String statistics() {
-        return text
+        return TEXT
                 .replace("{1}", String.valueOf(attackersCount))
                 .replace("{2}", String.valueOf(TestService.AMOUNT))
                 .replace("{3}", String.valueOf(TestService.INITIAL_AMOUNT - attackersCount * 1000));
@@ -113,8 +117,10 @@ public class AttackService {
     class GetRequestWork implements Callable<String> {
         public String call() {
             try {
-                return restTemplate.getForObject("http://localhost:80/api/v1/test", String.class);
-            } catch (Throwable throwable) {
+                return restTemplate.getForObject(ADDRESS, String.class);
+//                logger.info("200-SUCCESS");
+//                return response;
+            } catch (Exception throwable) {
                 attackLogger.error("connection timeout");
                 throw throwable;
             }
