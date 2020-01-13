@@ -66,4 +66,9 @@ public class UserService {
             throw new GeneralNotFoundException("user", "id", id);
         return optionalUserEntity.get();
     }
+
+    public UserEntity increaseLoanAmount(UserEntity userEntity, Long amount) {
+        userEntity.setBalance(userEntity.getBalance() + amount);
+        return userRepository.save(userEntity);
+    }
 }
