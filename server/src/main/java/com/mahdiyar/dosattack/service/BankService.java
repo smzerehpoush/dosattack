@@ -60,4 +60,9 @@ public class BankService {
         bankEntity.setBalance(balance);
         return new BankDto(bankRepository.save(bankEntity));
     }
+
+    public BankEntity decreaseLoanAmount(BankEntity bankEntity, Long amount) {
+        bankEntity.setBalance(bankEntity.getBalance() - amount);
+        return bankRepository.save(bankEntity);
+    }
 }
