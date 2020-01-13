@@ -1,6 +1,6 @@
 package com.mahdiyar.dosattack.common;
 
-import lombok.Data;
+import com.mahdiyar.dosattack.model.entity.mysql.UserEntity;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.annotation.Scope;
@@ -19,4 +19,5 @@ public class RequestContext {
     private String requestId = UUID.randomUUID().toString();
     private HttpServletRequest request;
     private String clientIp;
+    private UserEntity user;
 }
