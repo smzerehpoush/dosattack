@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
 /**
  * @author Seyyed Mahdiyar Zerehpoush
@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AuthenticationService {
     @Autowired
     private UserService userService;
-    private static final ConcurrentHashMap<String, String> userTokens = new ConcurrentHashMap<>();
     private MessageDigest messageDigest;
 
     @Autowired
@@ -39,16 +38,15 @@ public class AuthenticationService {
     }
 
     public UserEntity authenticate(String plainToken) throws UserNotAuthenticatedException, GeneralNotFoundException {
-        String result = userTokens.get(hash(plainToken));
-        if (result == null)
+        Optional<UserTokenEntity> result = userTokenRepository.findById(hash(plainToken));
+        if (!result.isPresent())
             throw new UserNotAuthenticatedException();
-        return userService.findById(result);
+        return userService.findById(result.get().getUserId());
     }
 
     public void addUser(String userId, String hashedToken) {
         UserTokenEntity userTokenEntity = new UserTokenEntity(userId, hashedToken);
         userTokenRepository.save(userTokenEntity);
-        userTokens.put(hashedToken, userId);
     }
 
     public String hash(String value) {
