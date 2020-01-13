@@ -32,4 +32,6 @@ public class LoanEntity {
     @JoinColumn(name = "bank_id")
     private BankEntity bank;
     private Long amount;
+    @Column(name = "done")
+    private boolean done;
 }

@@ -16,11 +16,13 @@ public class LoanDto {
     private BankDto bank;
     private Long amount;
     private Date creationDate;
+    private boolean done;
 
     public LoanDto(LoanEntity loanEntity) {
         this.user = new BriefUserDto(loanEntity.getUser());
         this.bank = new BankDto(loanEntity.getBank());
         this.amount = loanEntity.getAmount();
         this.creationDate = loanEntity.getCreationDate();
+        this.done = loanEntity.isDone();
     }
 }
