@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -47,25 +46,27 @@ public class AttackService {
     }
 
     public String attack(int initialSize, long maxSize, int steps) throws InterruptedException {
+        attackLogger.info("##################################################");
         logger.info("5s for warming up....");
         Thread.sleep(5000);
         logger.info("start attack process");
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
+        Long startTime = System.currentTimeMillis();
         attackLogger.info("computing each step size ...");
         double stepSize = countStepSize(initialSize, maxSize, steps);
         attackLogger.info("each step size : {}", stepSize);
         long count = 0;
         int i = 1;
         while (count / maxSize < 2) {
+            long l1 = System.currentTimeMillis();
             count = (long) initialSize + (int) Math.pow(stepSize, i);
             printAttackStatus(i, count);
             attack(count);
+            attackLogger.info("duration : {}", System.currentTimeMillis() - l1);
             count = (long) initialSize + (int) Math.pow(stepSize, ++i);
         }
         attackLogger.info("Done!");
-        stopWatch.stop();
-        return "Done! execution time : " + stopWatch.getTotalTimeMillis() + " ms";
+        attackLogger.info("##################################################");
+        return "Done! execution time : " + (System.currentTimeMillis() - startTime) + " ms";
     }
 
     private void printAttackStatus(int state, long count) {
