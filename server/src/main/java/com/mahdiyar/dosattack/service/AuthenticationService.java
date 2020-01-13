@@ -3,6 +3,8 @@ package com.mahdiyar.dosattack.service;
 import com.mahdiyar.dosattack.exceptions.GeneralNotFoundException;
 import com.mahdiyar.dosattack.exceptions.UserNotAuthenticatedException;
 import com.mahdiyar.dosattack.model.entity.UserEntity;
+import com.mahdiyar.dosattack.model.entity.UserTokenEntity;
+import com.mahdiyar.dosattack.repository.redisRepositories.UserTokenRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ public class AuthenticationService {
     private static final ConcurrentHashMap<String, String> userTokens = new ConcurrentHashMap<>();
     private MessageDigest messageDigest;
 
+    @Autowired
+    private UserTokenRepository userTokenRepository;
+
     public AuthenticationService() {
         try {
             messageDigest = MessageDigest.getInstance("SHA-512");
@@ -41,6 +46,8 @@ public class AuthenticationService {
     }
 
     public void addUser(String userId, String hashedToken) {
+        UserTokenEntity userTokenEntity = new UserTokenEntity(userId, hashedToken);
+        userTokenRepository.save(userTokenEntity);
         userTokens.put(hashedToken, userId);
     }
 
