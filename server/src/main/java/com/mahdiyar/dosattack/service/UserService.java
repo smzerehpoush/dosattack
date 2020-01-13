@@ -36,7 +36,10 @@ public class UserService {
         String plainToken = RandomString.make(40);
         String hashedToken = authenticationService.hash(plainToken);
         authenticationService.addUser(userEntity.getId(), hashedToken);
-        httpServletResponse.addCookie(new Cookie("Authorization", plainToken));
+        Cookie cookie = new Cookie("Authorization", plainToken);
+        cookie.setPath("/");
+        cookie.setMaxAge(Integer.MAX_VALUE);
+        httpServletResponse.addCookie(cookie);
         return new LoginResponseDto(userEntity.getId(), userEntity.getUsername());
     }
 
