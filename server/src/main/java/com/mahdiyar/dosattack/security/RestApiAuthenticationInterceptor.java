@@ -1,13 +1,17 @@
 package com.mahdiyar.dosattack.security;
 
 import com.mahdiyar.dosattack.common.RequestContext;
-import com.mahdiyar.dosattack.model.entity.RequestLogEntity;
-import com.mahdiyar.dosattack.repository.mongoRepositories.RequestLogMongoRepository;
+import com.mahdiyar.dosattack.exceptions.GeneralNotFoundException;
+import com.mahdiyar.dosattack.exceptions.UserNotAuthenticatedException;
+import com.mahdiyar.dosattack.model.entity.mongo.RequestLogEntity;
+import com.mahdiyar.dosattack.model.entity.mysql.UserEntity;
+import com.mahdiyar.dosattack.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
@@ -15,17 +19,20 @@ import java.util.Date;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+
 @Component
 public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter {
+    @Autowired
+    private AuthenticationService authenticationService;
     private static ConcurrentHashMap<Long, Integer> ipMap = new ConcurrentHashMap<>();
     private static Random rnd;
     @Autowired
     private RequestContext requestContext;
-    @Autowired
-    private RequestLogMongoRepository requestLogMongoRepository;
+//    @Autowired
+//    private RequestLogMongoRepository requestLogMongoRepository;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws UserNotAuthenticatedException, GeneralNotFoundException {
         requestContext.setRequest(request);
         if (request == null) {
             return true;
@@ -38,26 +45,24 @@ public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter 
         requestContext.setClientIp(ip);
         RequestLogEntity requestLogEntity = new RequestLogEntity(requestContext.getClientIp(), request.getMethod(), new Date());
 //        requestLogRedisRepository.save(requestLogEntity);
-        requestLogMongoRepository.save(requestLogEntity);
+//        requestLogMongoRepository.save(requestLogEntity);
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
             if (method.isAnnotationPresent(RateLimit.class)) {
 
             }
-//            if (method.isAnnotationPresent(AuthRequired.class) && method.isAnnotationPresent(ActiveUserRequired.class)) {
-//                AuthRequired authRequired = method.getAnnotation(AuthRequired.class);
-//                SessionEntity sessionEntity = sessionService.validateToken(requestContext.getTokenStr(), authRequired.roles(), requestContext.getClientIp());
-//                checkUserIsActive(sessionEntity);
-//                requestContext.setSession(sessionEntity);
-//            } else if (method.isAnnotationPresent(AuthRequired.class)) {
-//                AuthRequired authRequired = method.getAnnotation(AuthRequired.class);
-//                SessionEntity sessionEntity = sessionService.validateToken(requestContext.getTokenStr(), authRequired.roles(), requestContext.getClientIp());
-//                requestContext.setSession(sessionEntity);
-//            } else if (method.isAnnotationPresent(ActiveUserRequired.class)) {
-//                SessionEntity sessionEntity = sessionService.validateSession(requestContext.getTokenStr(), requestContext.getClientIp());
-//                checkUserIsActive(sessionEntity);
-//            }
+            if (method.isAnnotationPresent(AuthRequired.class)) {
+                Cookie[] cookies = request.getCookies();
+                for (Cookie cookie : cookies) {
+                    if (cookie.getName().equals("Authorization")) {
+                        UserEntity userEntity = authenticationService.authenticate(cookie.getValue());
+                        requestContext.setUser(userEntity);
+                    }
+
+                }
+
+            }
         }
         return true;
     }
