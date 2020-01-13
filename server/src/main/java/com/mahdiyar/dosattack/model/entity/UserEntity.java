@@ -31,7 +31,7 @@ public class UserEntity {
     @Column(name = "hashed_password")
     private String hashedPassword;
     @Column(name = "balance", columnDefinition = "default 0")
-    private int balance;
+    private long balance;
     @Column(name = "is_admin")
     private boolean isAdmin;
 }

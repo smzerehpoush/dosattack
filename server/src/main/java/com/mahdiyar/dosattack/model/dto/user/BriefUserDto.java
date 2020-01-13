@@ -10,7 +10,7 @@ import lombok.Data;
 public class BriefUserDto {
     private String id;
     private String username;
-    private int balance;
+    private long balance;
 
     public BriefUserDto(UserEntity userEntity) {
         this.id = userEntity.getId();
