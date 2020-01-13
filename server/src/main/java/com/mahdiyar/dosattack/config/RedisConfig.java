@@ -23,11 +23,6 @@ public class RedisConfig {
     @Setter
     private String password;
 
-//    @Bean
-//    JedisConnectionFactory jedisConnectionFactory() {
-//        return new JedisConnectionFactory(redisStandaloneConfiguration());
-//    }
-
     @Bean
     public LettuceConnectionFactory lettuceConnectionFactory() {
         return new LettuceConnectionFactory(redisStandaloneConfiguration());

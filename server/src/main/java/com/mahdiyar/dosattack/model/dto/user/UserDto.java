@@ -1,6 +1,6 @@
 package com.mahdiyar.dosattack.model.dto.user;
 
-import com.mahdiyar.dosattack.model.entity.mysql.UserEntity;
+import com.mahdiyar.dosattack.model.entity.UserEntity;
 import lombok.Data;
 
 /**

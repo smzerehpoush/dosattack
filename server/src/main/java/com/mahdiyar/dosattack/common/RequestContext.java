@@ -1,6 +1,6 @@
 package com.mahdiyar.dosattack.common;
 
-import com.mahdiyar.dosattack.model.entity.mysql.UserEntity;
+import com.mahdiyar.dosattack.model.entity.UserEntity;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.annotation.Scope;

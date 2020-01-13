@@ -2,7 +2,7 @@ package com.mahdiyar.dosattack.service;
 
 import com.mahdiyar.dosattack.exceptions.GeneralNotFoundException;
 import com.mahdiyar.dosattack.exceptions.UserNotAuthenticatedException;
-import com.mahdiyar.dosattack.model.entity.mysql.UserEntity;
+import com.mahdiyar.dosattack.model.entity.UserEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

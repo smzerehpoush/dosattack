@@ -8,7 +8,7 @@ import com.mahdiyar.dosattack.model.dto.request.user.SignupRequestDto;
 import com.mahdiyar.dosattack.model.dto.response.user.LoginResponseDto;
 import com.mahdiyar.dosattack.model.dto.response.user.SignupResponseDto;
 import com.mahdiyar.dosattack.model.dto.user.BriefUserDto;
-import com.mahdiyar.dosattack.model.entity.mysql.UserEntity;
+import com.mahdiyar.dosattack.model.entity.UserEntity;
 import com.mahdiyar.dosattack.repository.mysqlRepositories.UserRepository;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.mahdiyar.dosattack.model.entity.mysql;
+package com.mahdiyar.dosattack.model.entity;
 
 
 import lombok.Data;
