@@ -1,5 +1,6 @@
 package com.mahdiyar.dosattack.controller;
 
+import com.mahdiyar.dosattack.security.RateLimit;
 import com.mahdiyar.dosattack.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ public class TestController {
     private TestService testService;
 
     @GetMapping
+    @RateLimit
     public String test() {
         return testService.test();
     }
