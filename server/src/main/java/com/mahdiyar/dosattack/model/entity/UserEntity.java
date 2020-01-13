@@ -32,4 +32,6 @@ public class UserEntity {
     private String hashedPassword;
     @Column(name = "balance", columnDefinition = "default 0")
     private int balance;
+    @Column(name = "is_admin")
+    private boolean isAdmin;
 }
