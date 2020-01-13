@@ -3,10 +3,11 @@ package com.mahdiyar.dosattack.security;
 import com.mahdiyar.dosattack.common.RequestContext;
 import com.mahdiyar.dosattack.exceptions.GeneralNotFoundException;
 import com.mahdiyar.dosattack.exceptions.UserNotAuthenticatedException;
-import com.mahdiyar.dosattack.model.entity.RequestLogEntity;
 import com.mahdiyar.dosattack.model.entity.UserEntity;
 import com.mahdiyar.dosattack.service.AuthenticationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -15,42 +16,62 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 
 @Component
+@Slf4j
 public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter {
+    private static final Integer DEFAULT_SIZE = 5000;
+    private static final Integer LIMIT = 500;
     @Autowired
     private AuthenticationService authenticationService;
-    private static ConcurrentHashMap<Long, Integer> ipMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<Long, Integer> ipMap = new ConcurrentHashMap<>(DEFAULT_SIZE);
+    private static Set<Long> ipBlackList = new CopyOnWriteArraySet<>();
     private static Random rnd;
     @Autowired
     private RequestContext requestContext;
-//    @Autowired
+
+    //    @Autowired
 //    private RequestLogMongoRepository requestLogMongoRepository;
+    @Scheduled(fixedRate = 3000)
+    public void emptyIpMap() {
+        logger.info("clearing ip map after 3 seconds.");
+        ipMap.clear();
+    }
+
+    @Scheduled(fixedRate = 30000)
+    public void emptyBlockedIpList() {
+        logger.info("clearing ip block list after 30 seconds.");
+        ipBlackList.clear();
+    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws UserNotAuthenticatedException, GeneralNotFoundException {
         requestContext.setRequest(request);
         if (request == null) {
-            return true;
+            return false;
         }
         if (request.getMethod().equals("OPTIONS")) {
             response.addHeader("Access-Control-Allow-Headers", "*");
         }
         String ip = resolveClientIP(request);
-        addIpToMap(ip);
+        Long ipLongValue = convertIpToLong(ip);
+        ipMap.put(ipLongValue, ipMap.getOrDefault(ipLongValue, 1) + 1);
         requestContext.setClientIp(ip);
-        RequestLogEntity requestLogEntity = new RequestLogEntity(requestContext.getClientIp(), request.getMethod(), new Date());
-//        requestLogRedisRepository.save(requestLogEntity);
-//        requestLogMongoRepository.save(requestLogEntity);
+//        RequestLogEntity requestLogEntity = new RequestLogEntity(requestContext.getClientIp(), request.getMethod(), new Date());
         if (handler instanceof HandlerMethod) {
             HandlerMethod handlerMethod = (HandlerMethod) handler;
             Method method = handlerMethod.getMethod();
             if (method.isAnnotationPresent(RateLimit.class)) {
-
+                if (dropRequest(ipLongValue)) {
+                    return false;
+                }
             }
             if (method.isAnnotationPresent(AuthRequired.class)) {
                 Cookie[] cookies = request.getCookies();
@@ -73,10 +94,17 @@ public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter 
         return true;
     }
 
-    private void addIpToMap(String ip) {
-
-        Long ipLongValue = convertIpToLong(ip);
-        ipMap.put(ipLongValue, ipMap.getOrDefault(ipLongValue, 1) + 1);
+    private boolean dropRequest(Long ipLongValue) {
+        if (ipBlackList.contains(ipLongValue)) {
+//            System.err.println("ip is in black list.");
+            return true;
+        }
+        if (ipMap.getOrDefault(ipLongValue, 1).compareTo(LIMIT) >= 0) {
+            System.err.println("adding ip to block list.");
+            ipBlackList.add(ipLongValue);
+            return true;
+        }
+        return false;
     }
 
 
