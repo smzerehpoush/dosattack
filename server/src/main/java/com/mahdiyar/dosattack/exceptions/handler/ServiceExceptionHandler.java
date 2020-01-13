@@ -38,7 +38,7 @@ public class ServiceExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<RestResponse<Void>> handleException(ServiceException ex) {
+    public ResponseEntity<RestResponse<Void>> handleException(Exception ex) {
         ExceptionDetai exceptionDetail = findExceptionDetail(ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
