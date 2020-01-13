@@ -54,10 +54,12 @@ public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter 
             }
             if (method.isAnnotationPresent(AuthRequired.class)) {
                 Cookie[] cookies = request.getCookies();
+                if (cookies == null)
+                    throw new UserNotAuthenticatedException();
                 for (Cookie cookie : cookies) {
                     if (cookie.getName().equals("Authorization")) {
                         UserEntity userEntity = authenticationService.authenticate(cookie.getValue());
-                        if (method.getAnnotation(AuthRequired.class).admin()){
+                        if (method.getAnnotation(AuthRequired.class).admin()) {
                             if (!userEntity.isAdmin())
                                 throw new UserNotAuthenticatedException();
                         }
