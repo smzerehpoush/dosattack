@@ -52,6 +52,7 @@ public class UserService {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(request.getUsername());
         userEntity.setHashedPassword(authenticationService.hash(request.getPassword()));
+        userEntity.setAdmin(false);
         userEntity = userRepository.save(userEntity);
         return new SignupResponseDto(userEntity.getUsername());
     }
