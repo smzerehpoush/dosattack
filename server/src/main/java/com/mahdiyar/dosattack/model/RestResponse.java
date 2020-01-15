@@ -1,28 +1,25 @@
 package com.mahdiyar.dosattack.model;
 
 import lombok.Data;
-
-import java.util.Date;
+import lombok.NoArgsConstructor;
 
 /**
  * @author Seyyed Mahdiyar Zerehpoush
  */
 @Data
+@NoArgsConstructor
 public class RestResponse<T> {
     private int code;
     private String message;
     private T content;
-    private Date responseTime;
-
-    public RestResponse() {
-        this.responseTime = new Date();
-    }
+    private Long responseTime;
 
     public static <T> RestResponse<T> ok(T content) {
         RestResponse<T> restResponse = new RestResponse<>();
         restResponse.code = 0;
         restResponse.message = "OK";
         restResponse.content = content;
+        restResponse.setResponseTime(System.currentTimeMillis());
         return restResponse;
     }
 
@@ -31,14 +28,11 @@ public class RestResponse<T> {
         restResponse.code = code;
         restResponse.message = message;
         restResponse.content = content;
+        restResponse.responseTime = System.currentTimeMillis();
         return restResponse;
     }
 
     public static RestResponse<Void> nok(Integer code, String message) {
-        RestResponse<Void> restResponse = new RestResponse<>();
-        restResponse.code = code;
-        restResponse.message = message;
-        restResponse.content = null;
-        return restResponse;
+        return nok(null, code, message);
     }
 }
