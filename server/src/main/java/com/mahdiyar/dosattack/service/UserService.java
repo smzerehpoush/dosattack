@@ -3,13 +3,14 @@ package com.mahdiyar.dosattack.service;
 import com.mahdiyar.dosattack.exceptions.GeneralNotFoundException;
 import com.mahdiyar.dosattack.exceptions.UserWithUsernameExistsException;
 import com.mahdiyar.dosattack.exceptions.UsernameOrPasswordIncorrectException;
-import com.mahdiyar.dosattack.model.dto.request.LoginRequestDto;
+import com.mahdiyar.dosattack.model.dto.request.user.LoginRequestDto;
 import com.mahdiyar.dosattack.model.dto.request.user.SignupRequestDto;
 import com.mahdiyar.dosattack.model.dto.response.user.LoginResponseDto;
 import com.mahdiyar.dosattack.model.dto.response.user.SignupResponseDto;
 import com.mahdiyar.dosattack.model.dto.user.BriefUserDto;
 import com.mahdiyar.dosattack.model.entity.UserEntity;
 import com.mahdiyar.dosattack.repository.mysqlRepositories.UserRepository;
+import com.mahdiyar.dosattack.util.Constants;
 import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class UserService {
         authenticationService.addUser(userEntity.getId(), hashedToken);
         Cookie cookie = new Cookie(Constants.AUTHORIZATION, plainToken);
         cookie.setPath("/");
+        cookie.setHttpOnly(true);
         cookie.setMaxAge(Integer.MAX_VALUE);
         httpServletResponse.addCookie(cookie);
         return new LoginResponseDto(userEntity.getId(), userEntity.getUsername());
@@ -56,7 +58,7 @@ public class UserService {
         userEntity.setUsername(request.getUsername());
         userEntity.setHashedPassword(authenticationService.hash(request.getPassword()));
         userEntity.setAdmin(false);
-        userEntity = userRepository.save(userEntity);
+        userEntity = userRepository.saveAndFlush(userEntity);
         return new SignupResponseDto(userEntity.getUsername());
     }
 
