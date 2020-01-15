@@ -15,7 +15,7 @@ import java.util.List;
  * @author Seyyed Mahdiyar Zerehpoush
  */
 @RestController
-@RequestMapping("/loan")
+@RequestMapping("/v1/loan")
 public class LoanController {
     @Autowired
     private LoanService loanService;

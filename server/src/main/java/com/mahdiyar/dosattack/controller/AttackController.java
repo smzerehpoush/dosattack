@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author Seyyed Mahdiyar Zerehpoush
  */
-@RequestMapping("api/v1/attack")
+@RequestMapping("/v1/attack")
 @RestController
 public class AttackController {
     @Autowired

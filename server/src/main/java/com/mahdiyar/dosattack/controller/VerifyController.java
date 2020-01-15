@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author Seyyed Mahdiyar Zerehpoush
  */
-@RequestMapping("/verify")
+@RequestMapping("/v1/verify")
 @RestController
 public class VerifyController {
     @Autowired

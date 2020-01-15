@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  * @author Seyyed Mahdiyar Zerehpoush
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/v1/user")
 public class UserController {
     @Autowired
     private UserService userService;

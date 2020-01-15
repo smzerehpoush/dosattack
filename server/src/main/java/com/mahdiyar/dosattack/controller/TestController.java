@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * @author Seyyed Mahdiyar Zerehpoush
  */
-@RequestMapping("/api/v1/test")
+@RequestMapping("/v1/test")
 @RestController
 public class TestController {
     @Autowired
