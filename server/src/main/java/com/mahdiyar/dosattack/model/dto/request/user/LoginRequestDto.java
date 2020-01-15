@@ -1,4 +1,4 @@
-package com.mahdiyar.dosattack.model.dto.request;
+package com.mahdiyar.dosattack.model.dto.request.user;
 
 import lombok.Data;
 
