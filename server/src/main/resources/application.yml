@@ -11,10 +11,10 @@ spring:
     database: mysql
     open-in-view: false
   datasource:
-      url: "jdbc:mysql://127.0.0.1:27028/dosattack?useUnicode=true&characterEncoding=UTF-8&useSSL=false"
-      username: "dosattack"
-      password: "dosattack"
-      driver-class-name: com.mysql.cj.jdbc.Driver
+    url: "jdbc:mysql://127.0.0.1:27028/dosattack?useUnicode=true&characterEncoding=UTF-8&useSSL=false"
+    username: "dosattack"
+    password: "dosattack"
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 server:
   port: 8099
@@ -27,8 +27,9 @@ com:
     dosattack:
       configuration:
         thread:
-          max-pool-size: 100
           core-pool-size: 50
+          max-pool-size: 100
+          queue-capacity: 1000
         rest-template:
           connection-timeout: 10000
           read-timeout: 5000
