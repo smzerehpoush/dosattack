@@ -22,7 +22,7 @@ public class MessageService {
 
     public String getMessage(String messageKey, Map<String, Object> params) {
         String message = messageSource.getMessage(messageKey, null, defaultLocalce);
-        if (params == null || params.keySet() == null)
+        if (params == null)
             return message;
         for (String key : params.keySet()) {
             message = message.replace("{" + key + "}", String.valueOf(params.get(key)));
