@@ -1,8 +1,11 @@
 package com.mahdiyar.dosattack.service;
 
 import com.mahdiyar.dosattack.model.RestResponse;
+import com.mahdiyar.dosattack.model.dto.request.LoginRequestDto;
 import com.mahdiyar.dosattack.model.dto.request.user.SignupRequestDto;
+import com.mahdiyar.dosattack.model.dto.response.user.LoginResponseDto;
 import com.mahdiyar.dosattack.model.dto.response.user.SignupResponseDto;
+import com.mahdiyar.dosattack.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +14,14 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
 
@@ -26,26 +31,19 @@ import java.util.concurrent.FutureTask;
 @Service
 @Slf4j
 public class AttackService {
-    @Autowired
-    private MessageService messageService;
-    private static String attackAddress;
-    private static String signupUrl;
+    private static MessageService messageService = new MessageService();
+    private static final String ATTACK_ADDRESS = Constants.ADDRESS;
+    private static final String SIGNUP_URL = Constants.SIGNUP_URL;
+    private static final String LOGIN_URL = Constants.LOGIN_URL;
     private static int attackersCount;
+    private static ConcurrentHashMap<String, String> usernameWithToken = null;
     private Logger attackLogger = LoggerFactory.getLogger("attack-logger");
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
     private RestTemplate restTemplate;
-    private RestTemplate signupRestTemplate = new RestTemplate();
-
-    public AttackService() {
-        if (attackAddress == null) {
-            attackAddress = messageService.getMessage("ADDRESS");
-        }
-        if (signupUrl == null) {
-            signupUrl = messageService.getMessage("SIGNUP_URL");
-        }
-    }
+    private static final RestTemplate signupRestTemplate = new RestTemplate();
+    private static final RestTemplate loginRestTemplate = new RestTemplate();
 
     private void attack(long size) {
         attackersCount++;
@@ -106,6 +104,12 @@ public class AttackService {
         return messageService.getMessage("TEXT", replaceMap);
     }
 
+    public Object bankAttack(int size) throws InterruptedException {
+        Thread.sleep(5000);
+        bulkSignupAndLogin(size);
+        return null;
+    }
+
     class GetRequestTask {
         private GetRequestWork work;
         private FutureTask<String> task;
@@ -134,7 +138,7 @@ public class AttackService {
     class GetRequestWork implements Callable<String> {
         public String call() {
             try {
-                return restTemplate.getForObject(attackAddress, String.class);
+                return restTemplate.getForObject(ATTACK_ADDRESS, String.class);
 //                logger.info("200-SUCCESS");
 //                return response;
             } catch (Exception throwable) {
@@ -144,8 +148,44 @@ public class AttackService {
         }
     }
 
-    private void bulkSignup(int count) {
+    private void bulkSignupAndLogin(int count) {
+        usernameWithToken = new ConcurrentHashMap<>(count);
 
+        for (int i = 0; i < count; i++) {
+            UUID uuid = UUID.randomUUID();
+            ResponseEntity<RestResponse<SignupResponseDto>> signupResponse = signup(uuid.toString(), uuid.toString());
+            boolean isOk = handleSignup(signupResponse);
+            if (!isOk)
+                continue;
+            ResponseEntity<RestResponse<LoginResponseDto>> loginResponse = login(uuid.toString(), uuid.toString());
+            isOk = handleLogin(loginResponse);
+            if (!isOk)
+                continue;
+            usernameWithToken.put(uuid.toString(), "");
+        }
+    }
+
+    private boolean handleLogin(ResponseEntity<RestResponse<LoginResponseDto>> loginResponse) {
+        return loginResponse.getStatusCode().equals(HttpStatus.OK) && loginResponse.getBody() != null && loginResponse.getBody().getCode() == 0 && loginResponse.getBody().getContent() != null;
+    }
+
+    private ResponseEntity<RestResponse<LoginResponseDto>> login(String username, String password) {
+        LoginRequestDto requestDto = new LoginRequestDto();
+        requestDto.setUsername(username);
+        requestDto.setPassword(password);
+        HttpEntity<LoginRequestDto> requestEntity = new HttpEntity<>(requestDto);
+        return loginRestTemplate
+                .exchange(
+                        LOGIN_URL,
+                        HttpMethod.POST,
+                        requestEntity,
+                        new ParameterizedTypeReference<RestResponse<LoginResponseDto>>() {
+                        }
+                );
+    }
+
+    private boolean handleSignup(ResponseEntity<RestResponse<SignupResponseDto>> signupResponse) {
+        return signupResponse.getStatusCode().equals(HttpStatus.OK) && signupResponse.getBody() != null && signupResponse.getBody().getCode() == 0 && signupResponse.getBody().getContent() != null;
     }
 
     private ResponseEntity<RestResponse<SignupResponseDto>> signup(String username,
@@ -156,7 +196,7 @@ public class AttackService {
         HttpEntity<SignupRequestDto> requestEntity = new HttpEntity<>(requestDto);
         return signupRestTemplate
                 .exchange(
-                        signupUrl,
+                        SIGNUP_URL,
                         HttpMethod.POST,
                         requestEntity,
                         new ParameterizedTypeReference<RestResponse<SignupResponseDto>>() {
