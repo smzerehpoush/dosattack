@@ -4,7 +4,7 @@ import com.mahdiyar.dosattack.exceptions.GeneralNotFoundException;
 import com.mahdiyar.dosattack.exceptions.UserWithUsernameExistsException;
 import com.mahdiyar.dosattack.exceptions.UsernameOrPasswordIncorrectException;
 import com.mahdiyar.dosattack.model.RestResponse;
-import com.mahdiyar.dosattack.model.dto.request.LoginRequestDto;
+import com.mahdiyar.dosattack.model.dto.request.user.LoginRequestDto;
 import com.mahdiyar.dosattack.model.dto.request.user.SignupRequestDto;
 import com.mahdiyar.dosattack.model.dto.response.user.LoginResponseDto;
 import com.mahdiyar.dosattack.model.dto.response.user.SignupResponseDto;
