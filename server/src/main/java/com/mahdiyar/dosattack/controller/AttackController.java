@@ -25,6 +25,12 @@ public class AttackController {
         return ResponseEntity.ok(attackService.attack(init, max, steps));
     }
 
+    @GetMapping("/bank")
+    public ResponseEntity bankAttack(
+            @RequestParam(name = "size", defaultValue = "100") int size) throws InterruptedException {
+        return ResponseEntity.ok(attackService.bankAttack(size));
+    }
+
     @GetMapping("/statistics")
     public ResponseEntity<String> statistics() {
         return ResponseEntity.ok(attackService.statistics());
