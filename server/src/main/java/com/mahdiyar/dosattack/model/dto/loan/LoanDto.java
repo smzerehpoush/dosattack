@@ -4,6 +4,7 @@ import com.mahdiyar.dosattack.model.dto.bank.BankDto;
 import com.mahdiyar.dosattack.model.dto.user.BriefUserDto;
 import com.mahdiyar.dosattack.model.entity.LoanEntity;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -11,6 +12,7 @@ import java.util.Date;
  * @author Seyyed Mahdiyar Zerehpoush
  */
 @Data
+@NoArgsConstructor
 public class LoanDto {
     private BriefUserDto user;
     private BankDto bank;

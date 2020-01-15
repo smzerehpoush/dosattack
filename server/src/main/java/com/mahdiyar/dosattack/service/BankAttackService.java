@@ -78,9 +78,9 @@ public class BankAttackService {
     protected CompletableFuture<ResponseEntity<RestResponse<LoanDto>>> loanRequest(
             String userId, String bankId, Long amount, String authorizationToken) {
         LoanRequestDto loanRequestDto = new LoanRequestDto(userId, bankId, amount);
-        HttpEntity httpEntity = new HttpEntity(loanRequestDto);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(Constants.COOKIE, Constants.AUTHORIZATION + "=" + authorizationToken);
+        HttpEntity<LoanRequestDto> httpEntity = new HttpEntity<>(loanRequestDto, httpHeaders);
         ResponseEntity<RestResponse<LoanDto>> loanRequestResponse = loanRequestRestTemplate
                 .exchange(
                         Constants.LOAN_REQUEST_URL,
@@ -97,7 +97,7 @@ public class BankAttackService {
         ResponseEntity<RestResponse<List<BankDto>>> getBanksResponse = bankRestTemplate
                 .exchange(
                         Constants.GET_BANKS_URL,
-                        HttpMethod.POST,
+                        HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<RestResponse<List<BankDto>>>() {
                         }
@@ -136,7 +136,9 @@ public class BankAttackService {
         String authorizationHeader = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         if (authorizationHeader == null || !authorizationHeader.contains(Constants.AUTHORIZATION + "="))
             throw new IllegalStateException();
-        return authorizationHeader.replace(Constants.AUTHORIZATION + "=", "");
+        String fullText = authorizationHeader
+                .replace(Constants.AUTHORIZATION + "=", "");
+        return fullText.subSequence(0, fullText.indexOf("; ")).toString();
     }
 
     private boolean handleLogin(ResponseEntity<RestResponse<LoginResponseDto>> loginResponse) {
