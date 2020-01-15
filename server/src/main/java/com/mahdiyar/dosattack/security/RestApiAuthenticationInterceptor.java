@@ -5,6 +5,7 @@ import com.mahdiyar.dosattack.exceptions.GeneralNotFoundException;
 import com.mahdiyar.dosattack.exceptions.UserNotAuthenticatedException;
 import com.mahdiyar.dosattack.model.entity.UserEntity;
 import com.mahdiyar.dosattack.service.AuthenticationService;
+import com.mahdiyar.dosattack.util.Constants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,11 +17,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 
@@ -78,7 +77,7 @@ public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter 
                 if (cookies == null)
                     throw new UserNotAuthenticatedException();
                 for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals("Authorization")) {
+                    if (cookie.getName().equals(Constants.AUTHORIZATION)) {
                         UserEntity userEntity = authenticationService.authenticate(cookie.getValue());
                         if (method.getAnnotation(AuthRequired.class).admin()) {
                             if (!userEntity.isAdmin())
