@@ -1,16 +1,21 @@
 package com.mahdiyar.dosattack.service;
 
+import com.mahdiyar.dosattack.model.RestResponse;
+import com.mahdiyar.dosattack.model.dto.request.user.SignupRequestDto;
+import com.mahdiyar.dosattack.model.dto.response.user.SignupResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
@@ -21,16 +26,26 @@ import java.util.concurrent.FutureTask;
 @Service
 @Slf4j
 public class AttackService {
-    private final static String ADDRESS = "http://localhost:8099/api/v1/test";
-    private final static String TEXT = "attackers count : {1} \n" +
-            "real amount : {2} \n" +
-            "predictable amount: {3} ";
+    @Autowired
+    private MessageService messageService;
+    private static String attackAddress;
+    private static String signupUrl;
     private static int attackersCount;
     private Logger attackLogger = LoggerFactory.getLogger("attack-logger");
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired
     private RestTemplate restTemplate;
+    private RestTemplate signupRestTemplate = new RestTemplate();
+
+    public AttackService() {
+        if (attackAddress == null) {
+            attackAddress = messageService.getMessage("ADDRESS");
+        }
+        if (signupUrl == null) {
+            signupUrl = messageService.getMessage("SIGNUP_URL");
+        }
+    }
 
     private void attack(long size) {
         attackersCount++;
@@ -46,7 +61,7 @@ public class AttackService {
     }
 
     public String attack(int initialSize, long maxSize, int steps) throws InterruptedException {
-        attackLogger.info("##################################################");
+        attackLogger.info("##########################################################################################");
         logger.info("5s for warming up....");
         Thread.sleep(5000);
         logger.info("start attack process");
@@ -65,7 +80,7 @@ public class AttackService {
             count = (long) initialSize + (int) Math.pow(stepSize, ++i);
         }
         attackLogger.info("Done!");
-        attackLogger.info("##################################################");
+        attackLogger.info("##########################################################################################");
         return "Done! execution time : " + (System.currentTimeMillis() - startTime) + " ms";
     }
 
@@ -84,10 +99,11 @@ public class AttackService {
     }
 
     public String statistics() {
-        return TEXT
-                .replace("{1}", String.valueOf(attackersCount))
-                .replace("{2}", String.valueOf(TestService.AMOUNT))
-                .replace("{3}", String.valueOf(TestService.INITIAL_AMOUNT - attackersCount * 1000));
+        Map<String, Object> replaceMap = new HashMap<>();
+        replaceMap.put("0", attackLogger);
+        replaceMap.put("1", TestService.AMOUNT);
+        replaceMap.put("2", TestService.INITIAL_AMOUNT - attackersCount * 1000);
+        return messageService.getMessage("TEXT", replaceMap);
     }
 
     class GetRequestTask {
@@ -118,7 +134,7 @@ public class AttackService {
     class GetRequestWork implements Callable<String> {
         public String call() {
             try {
-                return restTemplate.getForObject(ADDRESS, String.class);
+                return restTemplate.getForObject(attackAddress, String.class);
 //                logger.info("200-SUCCESS");
 //                return response;
             } catch (Exception throwable) {
@@ -126,5 +142,25 @@ public class AttackService {
                 throw throwable;
             }
         }
+    }
+
+    private void bulkSignup(int count) {
+
+    }
+
+    private ResponseEntity<RestResponse<SignupResponseDto>> signup(String username,
+                                                                   String password) {
+        SignupRequestDto requestDto = new SignupRequestDto();
+        requestDto.setUsername(username);
+        requestDto.setPassword(password);
+        HttpEntity<SignupRequestDto> requestEntity = new HttpEntity<>(requestDto);
+        return signupRestTemplate
+                .exchange(
+                        signupUrl,
+                        HttpMethod.POST,
+                        requestEntity,
+                        new ParameterizedTypeReference<RestResponse<SignupResponseDto>>() {
+                        }
+                );
     }
 }
