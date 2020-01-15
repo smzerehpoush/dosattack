@@ -1,6 +1,7 @@
 package com.mahdiyar.dosattack.controller;
 
 import com.mahdiyar.dosattack.service.AttackService;
+import com.mahdiyar.dosattack.service.BankAttackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class AttackController {
     @Autowired
     private AttackService attackService;
+    @Autowired
+    private BankAttackService bankAttackService;
 
     @GetMapping
     public ResponseEntity<String> attack(
@@ -28,7 +31,7 @@ public class AttackController {
     @GetMapping("/bank")
     public ResponseEntity bankAttack(
             @RequestParam(name = "size", defaultValue = "100") int size) throws InterruptedException {
-        return ResponseEntity.ok(attackService.bankAttack(size));
+        return ResponseEntity.ok(bankAttackService.bankAttack(size));
     }
 
     @GetMapping("/statistics")
