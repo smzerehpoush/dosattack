@@ -31,6 +31,7 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler({UsernameOrPasswordIncorrectException.class, UserNotAuthenticatedException.class})
     public ResponseEntity<RestResponse<Void>> handleUsernameOrPasswordIncorrectException(ServiceException ex) {
+        logger.error("serviceException ", ex);
         ExceptionDetai exceptionDetail = findExceptionDetail(ex);
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
@@ -39,6 +40,7 @@ public class ServiceExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestResponse<Void>> handleException(Exception ex) {
+        logger.error("general exception", ex);
         ExceptionDetai exceptionDetail = findExceptionDetail(ex);
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
