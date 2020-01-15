@@ -1,7 +1,7 @@
 package com.mahdiyar.dosattack.service;
 
 import com.mahdiyar.dosattack.model.RestResponse;
-import com.mahdiyar.dosattack.model.dto.request.LoginRequestDto;
+import com.mahdiyar.dosattack.model.dto.request.user.LoginRequestDto;
 import com.mahdiyar.dosattack.model.dto.request.user.SignupRequestDto;
 import com.mahdiyar.dosattack.model.dto.response.user.LoginResponseDto;
 import com.mahdiyar.dosattack.model.dto.response.user.SignupResponseDto;
@@ -12,10 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -153,16 +150,28 @@ public class AttackService {
 
         for (int i = 0; i < count; i++) {
             UUID uuid = UUID.randomUUID();
-            ResponseEntity<RestResponse<SignupResponseDto>> signupResponse = signup(uuid.toString(), uuid.toString());
-            boolean isOk = handleSignup(signupResponse);
-            if (!isOk)
-                continue;
-            ResponseEntity<RestResponse<LoginResponseDto>> loginResponse = login(uuid.toString(), uuid.toString());
-            isOk = handleLogin(loginResponse);
-            if (!isOk)
-                continue;
-            usernameWithToken.put(uuid.toString(), "");
+            try {
+                ResponseEntity<RestResponse<SignupResponseDto>> signupResponse = signup(uuid.toString(), uuid.toString());
+                boolean isOk = handleSignup(signupResponse);
+                if (!isOk)
+                    continue;
+                ResponseEntity<RestResponse<LoginResponseDto>> loginResponse = login(uuid.toString(), uuid.toString());
+                isOk = handleLogin(loginResponse);
+                if (!isOk)
+                    continue;
+                usernameWithToken.put(uuid.toString(), extractAuthorizationToken(loginResponse));
+            } catch (Exception ex) {
+                logger.error("error in signup/login for user with username : {}", uuid.toString(), ex);
+            }
+
         }
+    }
+
+    private String extractAuthorizationToken(ResponseEntity<RestResponse<LoginResponseDto>> loginResponse) {
+        String authorizationHeader = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        if (authorizationHeader == null || !authorizationHeader.contains(Constants.AUTHORIZATION + "="))
+            throw new IllegalStateException();
+        return authorizationHeader.replace(Constants.AUTHORIZATION + "=", "");
     }
 
     private boolean handleLogin(ResponseEntity<RestResponse<LoginResponseDto>> loginResponse) {
