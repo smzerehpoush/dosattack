@@ -1,7 +1,7 @@
 package com.mahdiyar.dosattack.exceptions;
 
 import com.mahdiyar.dosattack.exceptions.handler.HandledException;
-import lombok.Data;
+import com.mahdiyar.dosattack.exceptions.handler.ServiceException;
 import lombok.Getter;
 
 /**

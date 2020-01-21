@@ -32,6 +32,10 @@ public class RedisConfig {
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
         JedisConnectionFactory jedisConnectionFactory = new JedisConnectionFactory(redisStandaloneConfiguration());
+        if (jedisConnectionFactory.getPoolConfig() != null) {
+            jedisConnectionFactory.getPoolConfig().setMaxIdle(30);
+            jedisConnectionFactory.getPoolConfig().setMinIdle(10);
+        }
         jedisConnectionFactory.afterPropertiesSet();
         return jedisConnectionFactory;
     }

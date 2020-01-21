@@ -95,7 +95,7 @@ public class RestApiAuthenticationInterceptor extends HandlerInterceptorAdapter 
 
     private boolean dropRequest(Long ipLongValue) {
         if (ipBlackList.contains(ipLongValue)) {
-//            System.err.println("ip is in black list.");
+            System.err.println("ip is in black list.");
             return true;
         }
         if (ipMap.getOrDefault(ipLongValue, 1).compareTo(LIMIT) >= 0) {

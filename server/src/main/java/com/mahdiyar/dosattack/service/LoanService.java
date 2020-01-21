@@ -1,7 +1,9 @@
 package com.mahdiyar.dosattack.service;
 
 import com.google.common.collect.ImmutableList;
+import com.mahdiyar.dosattack.exceptions.CanNotSeeOthersLoanException;
 import com.mahdiyar.dosattack.exceptions.GeneralNotFoundException;
+import com.mahdiyar.dosattack.exceptions.UserNotAuthenticatedException;
 import com.mahdiyar.dosattack.model.dto.loan.LoanDto;
 import com.mahdiyar.dosattack.model.dto.request.loan.LoanRequestDto;
 import com.mahdiyar.dosattack.model.entity.BankEntity;
@@ -62,7 +64,10 @@ public class LoanService {
         return loanDtos;
     }
 
-    public LoanDto getLoan(String loanId) throws GeneralNotFoundException {
+    public LoanDto getLoan(String loanId, UserEntity user) throws GeneralNotFoundException, CanNotSeeOthersLoanException {
+        LoanEntity loanEntity = findById(loanId);
+        if (!loanEntity.getUser().equals(user) && !loanEntity.getUser().isAdmin())
+            throw new CanNotSeeOthersLoanException();
         return new LoanDto(findById(loanId));
     }
 }

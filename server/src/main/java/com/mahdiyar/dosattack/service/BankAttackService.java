@@ -52,6 +52,7 @@ public class BankAttackService {
     }
 
     private void bulkLoanRequest() {
+        logger.info("staring to request loans bulk ....");
         List<CompletableFuture<ResponseEntity<RestResponse<LoanDto>>>> concurrentList = new CopyOnWriteArrayList<>();
         for (Pair<String, String> idAndToken : usernameWithToken.values()) {
             Pair<BankDto, Long> bankAndAmount = chooseRandomBank();
@@ -78,6 +79,7 @@ public class BankAttackService {
     protected CompletableFuture<ResponseEntity<RestResponse<LoanDto>>> loanRequest(
             String userId, String bankId, Long amount, String authorizationToken) {
         LoanRequestDto loanRequestDto = new LoanRequestDto(userId, bankId, amount);
+        logger.info("new loan request {}",loanRequestDto);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add(Constants.COOKIE, Constants.AUTHORIZATION + "=" + authorizationToken);
         HttpEntity<LoanRequestDto> httpEntity = new HttpEntity<>(loanRequestDto, httpHeaders);
@@ -110,17 +112,21 @@ public class BankAttackService {
     private void bulkSignupAndLogin(int count) {
         usernameWithToken = new ConcurrentHashMap<>(count);
 
+        logger.info("starting to create and signup {} users.",count);
         for (int i = 0; i < count; i++) {
             UUID uuid = UUID.randomUUID();
             try {
+                logger.info("signing up user with username : {}",uuid.toString());
                 ResponseEntity<RestResponse<SignupResponseDto>> signupResponse = signup(uuid.toString(), uuid.toString());
                 boolean isOk = handleSignup(signupResponse);
                 if (!isOk)
                     continue;
+                logger.info("logging in user with username : {}",uuid.toString());
                 ResponseEntity<RestResponse<LoginResponseDto>> loginResponse = login(uuid.toString(), uuid.toString());
                 isOk = handleLogin(loginResponse);
                 if (!isOk)
                     continue;
+                logger.info("adding user to users with username : {}",uuid.toString());
                 usernameWithToken.put(
                         uuid.toString(),
                         new Pair<>(

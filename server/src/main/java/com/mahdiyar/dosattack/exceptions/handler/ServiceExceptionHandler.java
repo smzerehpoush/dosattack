@@ -1,6 +1,5 @@
 package com.mahdiyar.dosattack.exceptions.handler;
 
-import com.mahdiyar.dosattack.exceptions.ServiceException;
 import com.mahdiyar.dosattack.exceptions.UserNotAuthenticatedException;
 import com.mahdiyar.dosattack.exceptions.UsernameOrPasswordIncorrectException;
 import com.mahdiyar.dosattack.model.RestResponse;

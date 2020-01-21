@@ -1,4 +1,4 @@
-package com.mahdiyar.dosattack.exceptions;
+package com.mahdiyar.dosattack.exceptions.handler;
 
 /**
  * @author Seyyed Mahdiyar Zerehpoush
